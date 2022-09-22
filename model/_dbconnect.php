@@ -15,9 +15,9 @@
 
         function login($mailID,$password){
             $conn=$this->conn();
+            session_start();
 
             $login = false;
-            $showError = false;
 
             $sql = "SELECT * FROM `users` WHERE `mailID`='$mailID' ";
             $result = mysqli_query($conn, $sql);
@@ -34,88 +34,57 @@
                         $_SESSION['phn'] = $row['phn'];
                         $_SESSION['password'] = $password;
                         $_SESSION['pic'] =$row['pic'];
+                        $_SESSION['date'] =$row['date'];
 
                         header("location: ../view/home.php");
                     }
                     else{
-                        $showError = "Invalid Credentials";
-                        
+                        $_SESSION['error'] = "Wrong Password";
+                        header("location: ../view/login.php");
                     }
                 }
             }
             else{
-                $showError = "Invalid Credentials";
+                $_SESSION['error']= "MailID not Registered";
+                header("location: ../view/login.php");
             }
 
             if($login){
-            echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success!</strong> You are logged in
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div> ';
-            }
-            if($showError){
-            echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong> '. $showError.'
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div> ';
+                $_SESSION['alert']= "Logged in Successful.";
+          
             }
         }
 
         function register($fname,$lname,$mailID,$phn,$password,$cpassword,$folder)
         {
             $conn=$this->conn();
-
+            session_start();
 
             $showAlert = false;
-            $showError = false;
-
             // Check whether this mailID exists
             $existSql = "SELECT * FROM `users` WHERE `mailID` = '$mailID'";
             $result = mysqli_query($conn, $existSql);
             $numExistRows = mysqli_num_rows($result);
             if($numExistRows > 0){
-                // $exists = true;
-                $showError =
-                "MailID Already Exists";
+               
+                $_SESSION['error']=  "MailID Already Exists";
+                header("location: ../view/register.php");
             }
             else{
-                // $exists = false;
                 if(($password == $cpassword)){
                     // $hash = password_hash($password, PASSWORD_DEFAULT);
                     $sql = "INSERT INTO `users` (`fname`,`lname`,`mailID`,`phn`, `password`,`pic`) VALUES ('$fname','$lname','$mailID','$phn', '$password','$folder')";
                     $result = mysqli_query($conn, $sql);
+                    $_SESSION['alert']="Your account is now created and you can login.";
                     header("location: ../view/login.php");
-
                 }
                 else{
-                    $showError =
-                    "Passwords do not match";
+                    $_SESSION['error'] = "Passwords do not match";
+                    header("location: ../view/register.php");
                 }
             }
-
-            if($showAlert){
-                echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Success!</strong> Your account is now created and you can login
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div> ';
-            }
-            if($showError){
-                echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> '. $showError.'
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div> ';
-            }
         }
-
-    
+   
         function edit($fname,$lname,$phn)
         {
             $conn=$this->conn();
@@ -123,17 +92,12 @@
             $mailID=$_SESSION['mailID'];
             $password=$_SESSION['password'];
             $sql = "UPDATE `users` SET `fname` = '$fname', `lname` = '$lname' ,`phn`='$phn' WHERE `users`.`mailID` = '$mailID'";
-            $result = mysqli_query($conn, $sql);
-            if ($result){
-                echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Success!</strong> Your record updated.
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                     </button>
-                 </div> ';
-                 $call=$this->login($mailID,$password);
+            $result1 = mysqli_query($conn, $sql);
+            if ($result1){
+                $call=$this->login($mailID,$password);
+                $_SESSION['alert']="Your Profile Details Updated.";
+                header("location: ../view/profile.php");
             }
-
         }
         
         function edit_pic($folder)
@@ -146,34 +110,9 @@
             $sql = "UPDATE `users` SET `pic` = '$folder' WHERE `users`.`mailID` = '$mailID'";
             $result = mysqli_query($conn, $sql);
             if ($result){
-                echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success!</strong> Your record updated.
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div> ';
                 $call=$this->login($mailID,$password);
-            }
-            
-        }
-
-        function edit_picd($folder)
-        {
-            $conn=$this->conn();
-            session_start();
-            $mailID=$_SESSION['mailID'];
-            $password=$_SESSION['password'];
-
-            $sql = "UPDATE `users` SET `pic` = '$folder' WHERE `users`.`mailID` = '$mailID'";
-            $result = mysqli_query($conn, $sql);
-            if ($result){
-                echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success!</strong> Your record updated to default.
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div> ';
-                $call=$this->login($mailID,$password);
+                $_SESSION['alert']="Your Profile Picture Updated.";
+                header("location: ../view/profile.php");
             }
             
         }
@@ -181,12 +120,12 @@
         function edit_pass($pass,$npass)
         {
             $conn=$this->conn();
-            $showError = false;
             session_start();
             $mailID=$_SESSION['mailID'];
             $password=$_SESSION['password'];
-            if($pass == $_SESSION['password']){
-                $showError ="Existing Password";
+            if( $password == $pass){
+                $_SESSION['error']="Existing Password";
+                header("location: ../view/c_pass.php"); 
             }
             
             else{
@@ -194,31 +133,21 @@
                     $sql = "UPDATE `users` SET `password` = '$pass' WHERE `users`.`mailID` = '$mailID'";
                     $result = mysqli_query($conn, $sql);
                     if ($result){
-                        echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <strong>Success!</strong> Password Changed.
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div> ';
+                        $_SESSION['alert']="Password Changed.";
+                        header("location: ../view/login.php"); 
+                        session_unset();
+                        session_destroy();
                     }
+
                 }
                 else{
-                    $showError =
+                    $_SESSION['error']=
                     "Passwords do not match";
+                    header("location: ../view/c_pass.php");
                 }
-                  header("location: ../view/login.php");   
-            }
-            if($showError){
-                echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong> '. $showError.'
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div> ';
-            }        
+            }      
         }
     }
-
 ?>
 
 <!doctype html>

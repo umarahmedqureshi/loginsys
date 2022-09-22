@@ -16,15 +16,21 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!=true){
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
       integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-    <title>Register</title>
+    <title>Edit Profile</title>
+    <style>
+        .error{
+            color:red
+        }
+    </style>
   </head>
 
-  <body>
+  <body class="bg-secondary text-light">
     <?php require 'partials/_nav.php' ?>
+    <?php include '../controller/message.php' ?>
 
     <div class="container my-4">
       <h1 class="text-center">Edit Profile</h1>
-      <form action="../controller/connection.php" method="post">
+      <form action="../controller/connection.php" method="post" id="profile">
         <div class="row  mt-5">
           <div class="form-group col-md-6 ">
             <label for="fname">First Name</label>
@@ -47,7 +53,7 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!=true){
 
         </div>
 
-        <button type="submit" name="edit" class="btn btn-primary">Update</button>
+        <button type="submit" name="edit" class="btn btn-primary px-5 h1">Update</button>
 
       </form>
       <form action="../controller/connection.php" method="post" enctype="multipart/form-data">
@@ -56,7 +62,7 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!=true){
           <input type="file" class="form-control" id="img" name="img">
 
         </div>
-        <button type="submit" name="edit_pic" class="btn btn-primary">Update</button>
+        <button type="submit" name="edit_pic" class="btn btn-primary px-5 h1">Update</button>
       </form>
 
     </div>
@@ -70,6 +76,30 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!=true){
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
       integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
       crossorigin="anonymous"></script>
+    <script src="../jquery.validate.min.js"></script>
+    <script>
+          $("#profile").validate({
+              rules: {
+            fname: "required",      
+            phn: {
+              digits: true,
+              minlength: 10,
+              maxlength: 10,
+            },
+          },
+
+          messages: {
+            fname: {
+            required: "Please enter first name",
+          },          
+          phn: {
+            digits: "Please enter valid phone number",
+            minlength: "Phone number field accept only 10 digits",
+            maxlength: "Phone number field accept only 10 digits",
+          },    
+          },
+      });
+    </script>
   </body>
 
 </html>
